@@ -1,0 +1,62 @@
+server:
+  port: ${SERVER_PORT:8001}
+
+spring:
+  application:
+    name: scan_initializer
+
+  kafka:
+    producer:
+      bootstrap-servers: ${KAFKA_HOST:localhost}:${KAFKA_PORT:9092}
+
+  datasource:
+    url: jdbc:postgresql://${POSTGRESQL_HOST:localhost}:${POSTGRESQL_PORT:5432}/mend
+    username: postgres
+    password: #
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+logging:
+  level:
+    root: info
+    org.springframework.web: debug
+    org.hibernate.SQL: debug
+    org.hibernate.type.descriptor.sql.BasicBinder: trace
+
+# Kafka
+topic:
+  name:
+    producer: scan.runner
+
+auto:
+  create:
+    topics:
+      enable: true
+
+# Actuator property - performance impact
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+    health:
+      show-details: always
+  metrics:
+    enable:
+      all: true
+  prometheus:
+    metrics.export.enabled: true
+
+scrape_configs:
+  - job_name: 'my-spring-boot-app'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['localhost:8000']
